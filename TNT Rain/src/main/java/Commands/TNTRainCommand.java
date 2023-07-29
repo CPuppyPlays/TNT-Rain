@@ -86,7 +86,7 @@ public class TNTRainCommand implements CommandExecutor, TabCompleter {
                     player.sendMessage(miniMessage.deserialize(("<green>TNT rain has successfully started")));
                 } catch(Exception e) {
                     player.sendMessage(miniMessage.deserialize(("<red>One of the arguments are invalid, /tntrain start <center-x> <center-z> <range> <num-tnt>")));
-                    e.printStackTrace();
+                    //e.printStackTrace(); debugger for testing if args are correct
                     return true;
                 }
             }
