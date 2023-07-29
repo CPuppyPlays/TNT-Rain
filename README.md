@@ -1,5 +1,5 @@
 # TNT-Rain
-Custom made plugin for jack707 on discord.
+Custom made PaperSpigot (1.20.1) plugin for jack707 on discord.
 
 This is a basic TNT Rain plugin that allows you do create an automatic tnt rain inside a certain radius, centered at a certain point.
 
