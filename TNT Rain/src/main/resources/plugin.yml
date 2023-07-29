@@ -1,0 +1,9 @@
+name: TNT_Rain
+version: '${project.version}'
+main: xyz.tntrain.Main
+api-version: 1.20
+commands:
+  tntrain:
+    description: Starts and stops the tnt rain
+    permission: tntrain.use
+    usage: /tntrain <start|stop>
