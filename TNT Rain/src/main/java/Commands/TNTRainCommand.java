@@ -14,6 +14,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import xyz.tntrain.Main;
+import xyz.tntrain.Vars;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,14 +25,7 @@ public class TNTRainCommand implements CommandExecutor, TabCompleter {
     private final MiniMessage miniMessage = MiniMessage.miniMessage();
     private final Random random = new Random();
 
-    private World world;
-    private double x1;
-    private double z1;
-    private int range;
-    private int numtnt;
-
-
-    private BukkitTask runnable;
+    private final ArrayList<BukkitTask> activeTNTRains = new ArrayList<>();
 
 
     @Override
@@ -40,36 +34,33 @@ public class TNTRainCommand implements CommandExecutor, TabCompleter {
 
         //Permission check
         if(!commandSender.hasPermission("tntrain.use")) {
-            player.sendMessage(miniMessage.deserialize("<red>You do not have permission to use this command!</red>"));
+            player.sendMessage(miniMessage.deserialize(Vars.Prefix+"<red>You do not have permission to use this command!"));
             return true;
         }
 
         if(args.length < 1) {
-            player.sendMessage(miniMessage.deserialize(("<red>Invalid Command Arguments, /tntrain <start|stop>")));
+            player.sendMessage(miniMessage.deserialize((Vars.Prefix+"Invalid Command Arguments, /tntrain <start|stop>")));
             return true;
         }
 
         switch(args[0]) {
             case "start" -> {
-                if(runnable != null) {
-                    player.sendMessage(miniMessage.deserialize(("<red>TNT Rain is already happening at "+ x1+", " +z1)));
-                    return true;
-                }
                 if(args.length < 5) {
-                    player.sendMessage(miniMessage.deserialize(("<red>Invalid Command Arguments, /tntrain start <center-x> <center-z> <range> <num-tnt>")));
+                    player.sendMessage(miniMessage.deserialize((Vars.Prefix+"Invalid Command Arguments, /tntrain start <center-x> <center-z> <range> <num-tnt>")));
                     return true;
                 }
 
                 try {
-                    x1 = Integer.parseInt(args[1]);
-                    z1 = Integer.parseInt(args[2]);
-                    range = Integer.parseInt(args[3]);
-                    numtnt = Integer.parseInt(args[4]);
-                    world = player.getWorld();
-
-                    runnable = new BukkitRunnable() {
+                    final double x1 = Integer.parseInt(args[1]);
+                    final double z1 = Integer.parseInt(args[2]);
+                    final int range = Integer.parseInt(args[3]);
+                    final int numtnt = Integer.parseInt(args[4]);
+                    activeTNTRains.add((new BukkitRunnable() {
                         @Override
                         public void run() {
+
+
+                            World world = player.getWorld();
 
                             for(int i = 0; i < numtnt; i++) {
                                 int x = (int) (x1 + random.nextInt(range * 2) - range);
@@ -81,22 +72,26 @@ public class TNTRainCommand implements CommandExecutor, TabCompleter {
 
                             }
                         }
-                    }.runTaskTimer(Main.getInstance(), 0, 20);
+                    }.runTaskTimer(Main.getInstance(), 0, 20)));
 
-                    player.sendMessage(miniMessage.deserialize(("<green>TNT rain has successfully started")));
+                    player.sendMessage(miniMessage.deserialize((Vars.Prefix+"You have a created a TNT Rain with the settings "+Vars.PC+x1+", "+z1 + " | " + range+" blocks | " + numtnt+" TNT/s")));
                 } catch(Exception e) {
-                    player.sendMessage(miniMessage.deserialize(("<red>One of the arguments are invalid, /tntrain start <center-x> <center-z> <range> <num-tnt>")));
-                    //e.printStackTrace(); debugger for testing if args are correct
+                    player.sendMessage(miniMessage.deserialize((Vars.Prefix+"One of the arguments are <red>invalid<reset>, /tntrain start <center-x> <center-z> <range> <num-tnt>")));
+                    e.printStackTrace();
                     return true;
                 }
             }
             case "stop" -> {
-                if(runnable == null) {
-                    player.sendMessage(miniMessage.deserialize(("<red>TNT Rain is already stopped")));
+                if(activeTNTRains.size() == 0) {
+                    player.sendMessage(miniMessage.deserialize((Vars.Prefix+"There are no active TNT Rains!")));
                     return true;
                 }
-                runnable.cancel();
-                player.sendMessage(miniMessage.deserialize(("<green>You have stopped the TNT Rain")));
+                for(BukkitTask task : activeTNTRains) {
+                    task.cancel();
+                }
+
+                player.sendMessage(miniMessage.deserialize((Vars.Prefix+"You have stopped "+Vars.PC+activeTNTRains.size()+" <gray>TNT Rain(s)")));
+                activeTNTRains.clear();
             }
 
         }
@@ -117,9 +112,9 @@ public class TNTRainCommand implements CommandExecutor, TabCompleter {
             } else if(args.length == 3) {
                 return new ArrayList<>(List.of(String.valueOf((player.getLocation().getBlockZ()))));
             } else if(args.length == 4) {
-                return new ArrayList<>(List.of("1", "8", "32", "64"));
+                return new ArrayList<>(List.of("1", "3", "8", "10"));
             } else if(args.length == 5) {
-                return new ArrayList<>(List.of("1", "8", "32", "64"));
+                return new ArrayList<>(List.of("1", "3", "8", "10"));
             }
         }
         return new ArrayList<>();
